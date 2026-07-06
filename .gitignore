@@ -1,0 +1,10 @@
+build/
+*.bin
+vocab.txt
+merges.txt
+__pycache__/
+*.pyc
+*-venv/
+.venv/
+venv/
+models/
