@@ -11,12 +11,12 @@ No argparse; paths are literals; output dir is Path.home()/"models".
 import os
 import sys
 import struct
-import tempfile
 import shutil
 from pathlib import Path
 
 import torch
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, GPT2Config
+from huggingface_hub import hf_hub_download
 
 # ---------------------------------------------------------------------------
 # Constants (locked — match FORMAT.md)
@@ -170,15 +170,13 @@ def write_tokenizer(vocab_path: Path, merges_path: Path, tok: GPT2Tokenizer) -> 
     # --- merges.txt ---
     # save_vocabulary writes merges.txt with a "#version: ..." first line;
     # we drop only that one comment line and copy the rest verbatim.
-    with tempfile.TemporaryDirectory() as tmpdir:
-        tok.save_vocabulary(tmpdir)
-        src = Path(tmpdir) / "merges.txt"
-        with open(src, "r", encoding="utf-8") as fin, \
-             open(merges_path, "w", encoding="utf-8") as fout:
-            for line in fin:
-                if line.startswith("#version:"):
-                    continue
-                fout.write(line)
+    src = hf_hub_download(repo_id="gpt2", filename="merges.txt")
+    with open(src, "r", encoding="utf-8") as fin, \
+         open(merges_path, "w", encoding="utf-8") as fout:
+        for line in fin:
+            if line.startswith("#version:"):
+                continue
+            fout.write(line)
     print(f"  wrote {merges_path}  ({merges_path.stat().st_size:,} bytes)")
 
 
